@@ -194,6 +194,13 @@ export class WebMcpServer extends Server {
           },
           getConfigWithOverrides: async () =>
             getConfigWithOverrides({ restApiArgs: tableauRequestHandlerExtra, requestOverrides }),
+          // True only when an MCP-Apps card can actually render for THIS client: the feature is on,
+          // the client advertised the UI capability, and it is not a known-incompatible renderer —
+          // the SAME condition that registers a tool as an app-tool below. Tools whose app path
+          // returns a card must gate on this (not on `mcpAppsEnabled` alone) so an app-incapable
+          // client falls back to a readable text result instead of an unrenderable payload
+          // (W-24212898).
+          mcpAppToolsRenderable: mcpAppsEnabled && supportsMcpApps && !isKnownIncompatibleClient,
         };
 
         return tableauToolCallback(args, tableauRequestHandlerExtra);
